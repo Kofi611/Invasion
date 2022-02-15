@@ -2754,6 +2754,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   loadSound("TheNovisBase", "sounds/TheNovisBase.wav");
   loadSound("AmbientPianoStrings", "sounds/AmbientPianoStrings.mp3");
   loadSound("BothOfUs", "sounds/BothOfUs.mp3");
+  loadSound("explosion", "sounds/ArcadeExplosion.wav");
   layers([
     "bg",
     "obj",
@@ -2768,6 +2769,11 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   var Height = height();
   replit.setData("highscore", score);
   scene("title", () => {
+    const menuMusic = play("AmbientPianoStrings", {
+      volume: 0.5,
+      loop: true
+    });
+    menuMusic.play();
     add([
       text("Invasion"),
       layer("ui"),
@@ -2782,7 +2788,10 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       "play",
       origin("center")
     ]);
-    onClick("play", (play2) => go("game"));
+    onClick("play", (play2) => {
+      go("game");
+      menuMusic.pause();
+    });
   });
   scene("game", () => {
     score = 0;
@@ -2790,7 +2799,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     alienSpawnSpeed = 1;
     alienSpeed = 50;
     health = 100;
-    const music = play("TheNovisBase", {
+    const gameMusic = play("TheNovisBase", {
       volume: 0.5,
       loop: true
     });
@@ -2838,7 +2847,8 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         origin("center"),
         move(UP, 200),
         cleanup(3),
-        "bullet"
+        "bullet",
+        color(rgb(123, 104, 238))
       ]);
     });
     loop(alienSpawnSpeed, () => {
@@ -2877,7 +2887,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     onCollide("bullet", "alien", (bullet, alien) => {
       destroy(alien), score += 1;
       if (health < 100) {
-        health += 2;
+        health += parseInt(rand(1, 5));
         healthDisplay.text = "Health:" + health;
       }
       scoreDisplay.text = "Score:" + score;
@@ -2885,6 +2895,9 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     onCollide("alien", "player", (alien, player2) => {
       destroy(alien), health -= parseInt(rand(3, 12));
       healthDisplay.text = "Health:" + health;
+      play("explosion", {
+        volume: 0.75
+      });
     });
     onUpdate(() => {
       if (health > 100) {
@@ -2892,11 +2905,13 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         healthDisplay.text = "Health:" + health;
       }
       if (health <= 0) {
+        gameMusic.pause();
         go("lose");
       }
     });
     onUpdate("alien", (alien) => {
       if (alien.pos.y >= height()) {
+        gameMusic.pause();
         go("lose");
       }
     });
@@ -2935,9 +2950,15 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       "menu",
       area()
     ]);
-    onClick("restart", (restart) => go("game"));
-    onClick("menu", (menu) => go("title"));
-    const music = play("BothOfUs", {
+    onClick("restart", (restart) => {
+      go("game");
+      loseMusic.pause();
+    });
+    onClick("menu", (menu) => {
+      go("title");
+      loseMusic.pause();
+    });
+    const loseMusic = play("BothOfUs", {
       volume: 0.5,
       loop: true
     });

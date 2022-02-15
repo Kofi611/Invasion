@@ -12,6 +12,7 @@ loadSound("TheNovisBase", "sounds/TheNovisBase.wav")
 loadSound("AmbientPianoStrings", "sounds/AmbientPianoStrings.mp3")
 //music by madirfan from pixabay
 loadSound("BothOfUs", "sounds/BothOfUs.mp3")
+loadSound("explosion", "sounds/ArcadeExplosion.wav")
 
 layers([
   "bg",
@@ -30,6 +31,13 @@ const Height = height()
 replit.setData("highscore", score);
 
 scene("title", () => {
+  
+  const menuMusic = play("AmbientPianoStrings", {
+    volume: 0.5,
+    loop: true
+  })
+  menuMusic.play()
+  
   add([
     text("Invasion"),
     layer("ui"),
@@ -46,7 +54,10 @@ scene("title", () => {
     origin("center")
   ])
 
-  onClick("play", (play) => go("game"))
+  onClick("play", (play) => {
+    go("game");
+    menuMusic.pause()
+  })
 })
 
 scene("game", () => {
@@ -56,7 +67,7 @@ scene("game", () => {
   alienSpawnSpeed = 1
   alienSpeed = 50
   health = 100
-  const music = play("TheNovisBase", {
+  const gameMusic = play("TheNovisBase", {
     volume: 0.5,
     loop: true
   })
@@ -113,6 +124,7 @@ scene("game", () => {
       move(UP, 200),
       cleanup(3),
       "bullet",
+      color(rgb(123, 104, 238))
     ])
   })
 
@@ -157,7 +169,7 @@ scene("game", () => {
     destroy(alien),
       score += 1
       if (health < 100) {
-        health+= 2
+        health+= parseInt(rand(1, 5))
         healthDisplay.text = "Health:" + health
       }
     scoreDisplay.text = "Score:" + score
@@ -167,6 +179,9 @@ scene("game", () => {
     destroy(alien),
       health -= parseInt(rand(3, 12))
       healthDisplay.text = "Health:" + health
+    play("explosion", {
+      volume: 0.75
+    })
   })
 
   onUpdate(() => {
@@ -175,17 +190,17 @@ scene("game", () => {
       healthDisplay.text = "Health:" + health
     }
     if (health <= 0) {
+      gameMusic.pause()
       go("lose")
     }
   })
 
   onUpdate("alien", (alien) => {
     if (alien.pos.y >= height()) {
+      gameMusic.pause()
       go("lose")
     }
   })
-
-  
 })
 
 scene("lose", () => {
@@ -227,10 +242,16 @@ scene("lose", () => {
     area()
   ])
 
-  onClick("restart", (restart) => go("game"))
-  onClick("menu", (menu) => go("title"))
+  onClick("restart", (restart) => {
+    go("game");
+    loseMusic.pause()
+  })
+  onClick("menu", (menu) => {
+    go("title");
+    loseMusic.pause()
+  })
 
-  const music = play("BothOfUs", {
+  const loseMusic = play("BothOfUs", {
     volume: 0.5,
     loop: true
   })
