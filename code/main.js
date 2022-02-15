@@ -58,6 +58,36 @@ scene("game", () => {
     loop: true
   })
 
+  const starCount = 500;
+  const starSpeed = 5;
+  var stars = [];
+
+  function spawnStars(){
+    for (let i = 0; i < starCount; i++) {
+      const newStar = {
+        xpos: rand(1, width()),
+        ypos: rand(1, height())
+      };
+      stars.push(newStar);
+    }
+  }
+
+  spawnStars();
+  
+  onUpdate(()=>{
+    stars.forEach((star) =>{
+      //star.ypos += starSpeed;
+      const intensity = rand(1, 255);
+  
+      drawRect({
+        width: 2,
+        height: 2,
+        pos: vec2(star.xpos, star.ypos),
+        color: rgb(intensity, intensity, intensity)
+      });
+    })
+  });
+
   const player = add([
     sprite("ship"),
     pos(80, 40),

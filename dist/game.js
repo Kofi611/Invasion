@@ -2789,6 +2789,31 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       volume: 0.5,
       loop: true
     });
+    const starCount = 500;
+    const starSpeed = 5;
+    var stars = [];
+    function spawnStars() {
+      for (let i2 = 0; i2 < starCount; i2++) {
+        const newStar = {
+          xpos: rand(1, width()),
+          ypos: rand(1, height())
+        };
+        stars.push(newStar);
+      }
+    }
+    __name(spawnStars, "spawnStars");
+    spawnStars();
+    onUpdate(() => {
+      stars.forEach((star) => {
+        const intensity = rand(1, 255);
+        drawRect({
+          width: 2,
+          height: 2,
+          pos: vec2(star.xpos, star.ypos),
+          color: rgb(intensity, intensity, intensity)
+        });
+      });
+    });
     const player = add([
       sprite("ship"),
       pos(80, 40),
