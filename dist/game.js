@@ -2763,6 +2763,10 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   var scoreRecord = 0;
   var alienSpawnSpeed = 1;
   var alienSpeed = 50;
+  var health = 100;
+  var Width = width();
+  var Height = height();
+  replit.setData("highscore", score);
   scene("title", () => {
     add([
       text("Invasion"),
@@ -2785,6 +2789,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     scoreRecord = 0;
     alienSpawnSpeed = 1;
     alienSpeed = 50;
+    health = 100;
     const music = play("TheNovisBase", {
       volume: 0.5,
       loop: true
@@ -2819,7 +2824,8 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       pos(80, 40),
       scale(0.1),
       area(),
-      origin("center")
+      origin("center"),
+      "player"
     ]);
     onMouseMove(() => {
       player.moveTo(mousePos());
@@ -2854,15 +2860,6 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         alienSpeed *= 2;
       }
     });
-    onCollide("bullet", "alien", (bullet, alien) => {
-      destroy(alien), score += 1;
-      scoreDisplay.text = "Score:" + score;
-    });
-    onUpdate("alien", (alien) => {
-      if (alien.pos.y >= height()) {
-        go("lose");
-      }
-    });
     const scoreDisplay = add([
       text("Score: 0", {
         size: 48
@@ -2870,18 +2867,62 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
       pos(width() - 250, 50),
       layer("ui")
     ]);
+    const healthDisplay = add([
+      text("Health: 100", {
+        size: 48
+      }),
+      pos(0 + 50, 50),
+      layer("ui")
+    ]);
+    onCollide("bullet", "alien", (bullet, alien) => {
+      destroy(alien), score += 1;
+      if (health < 100) {
+        health += 2;
+        healthDisplay.text = "Health:" + health;
+      }
+      scoreDisplay.text = "Score:" + score;
+    });
+    onCollide("alien", "player", (alien, player2) => {
+      destroy(alien), health -= parseInt(rand(3, 12));
+      healthDisplay.text = "Health:" + health;
+    });
+    onUpdate(() => {
+      if (health > 100) {
+        health = 100;
+        healthDisplay.text = "Health:" + health;
+      }
+      if (health <= 0) {
+        go("lose");
+      }
+    });
+    onUpdate("alien", (alien) => {
+      if (alien.pos.y >= height()) {
+        go("lose");
+      }
+    });
   });
   scene("lose", () => {
     add([
       text("Game Over"),
-      pos(center()),
+      pos(Width / 2, Height / 2 - 50),
       origin("center")
     ]);
     add([
       text("Your Score: " + score),
-      pos(width() / 2, height() / 2 + 50),
+      pos(width() / 2, height() / 2),
       origin("center")
     ]);
+    replit.getData("highscore").then((highscore) => {
+      if (score > highscore) {
+        highscore = score;
+        replit.setData("highscore", highscore);
+      }
+      add([
+        text("High Score: " + highscore),
+        pos(Width / 2, Height / 2 + 50),
+        origin("center")
+      ]);
+    });
     add([
       text("Play Again"),
       pos(50, height() - 100),

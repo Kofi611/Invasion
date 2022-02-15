@@ -1,5 +1,4 @@
 import kaboom from "kaboom"
-
 // initialize context
 kaboom({
   background: [0, 0, 0],
@@ -24,21 +23,24 @@ var score = 0
 var scoreRecord = 0
 var alienSpawnSpeed = 1
 var alienSpeed = 50
+var health = 100
+const Width = width()
+const Height = height()
 
-
+replit.setData("highscore", score);
 
 scene("title", () => {
   add([
     text("Invasion"),
     layer("ui"),
-    pos((width()/2), 100),
+    pos((width() / 2), 100),
     origin("center")
   ])
 
   add([
     text("Play"),
     layer("ui"),
-    pos((width()/2), 200),
+    pos((width() / 2), 200),
     area(),
     "play",
     origin("center")
@@ -53,6 +55,7 @@ scene("game", () => {
   scoreRecord = 0
   alienSpawnSpeed = 1
   alienSpeed = 50
+  health = 100
   const music = play("TheNovisBase", {
     volume: 0.5,
     loop: true
@@ -62,7 +65,7 @@ scene("game", () => {
   const starSpeed = 5;
   var stars = [];
 
-  function spawnStars(){
+  function spawnStars() {
     for (let i = 0; i < starCount; i++) {
       const newStar = {
         xpos: rand(1, width()),
@@ -73,12 +76,12 @@ scene("game", () => {
   }
 
   spawnStars();
-  
-  onUpdate(()=>{
-    stars.forEach((star) =>{
+
+  onUpdate(() => {
+    stars.forEach((star) => {
       //star.ypos += starSpeed;
       const intensity = rand(1, 255);
-  
+
       drawRect({
         width: 2,
         height: 2,
@@ -94,6 +97,7 @@ scene("game", () => {
     scale(0.1),
     area(),
     origin("center"),
+    "player"
   ])
 
   onMouseMove(() => {
@@ -112,7 +116,7 @@ scene("game", () => {
     ])
   })
 
-  loop(alienSpawnSpeed, ()  => {
+  loop(alienSpawnSpeed, () => {
     add([
       rect(20, 20),
       pos(rand(10, width(-10)), 10),
@@ -133,10 +137,46 @@ scene("game", () => {
     }
   })
 
+  const scoreDisplay = add([
+    text("Score: 0", {
+      size: 48
+    }),
+    pos(width() - 250, 50),
+    layer("ui"),
+  ])
+
+  const healthDisplay = add([
+    text("Health: 100", {
+      size: 48
+    }),
+    pos(0 + 50, 50),
+    layer("ui"),
+  ])
+
   onCollide("bullet", "alien", (bullet, alien) => {
     destroy(alien),
-    score += 1
+      score += 1
+      if (health < 100) {
+        health+= 2
+        healthDisplay.text = "Health:" + health
+      }
     scoreDisplay.text = "Score:" + score
+  })
+
+  onCollide("alien", "player", (alien, player) => {
+    destroy(alien),
+      health -= parseInt(rand(3, 12))
+      healthDisplay.text = "Health:" + health
+  })
+
+  onUpdate(() => {
+    if (health > 100) {
+      health = 100;
+      healthDisplay.text = "Health:" + health
+    }
+    if (health <= 0) {
+      go("lose")
+    }
   })
 
   onUpdate("alien", (alien) => {
@@ -145,26 +185,33 @@ scene("game", () => {
     }
   })
 
-  const scoreDisplay = add([
-    text("Score: 0", {
-      size: 48
-    }),
-    pos(width() - 250, 50),
-    layer("ui"),
-  ])
+  
 })
 
 scene("lose", () => {
   add([
     text("Game Over"),
-    pos(center()),
+    pos(Width/2, Height/2 - 50),
     origin("center")
   ])
   add([
     text("Your Score: " + score),
-    pos(width()/2, height()/2 + 50),
+    pos(width() / 2, height()/2),
     origin("center")
   ])
+
+  replit.getData("highscore").then((highscore) => {
+    if (score > highscore) {
+      highscore = score;
+      replit.setData("highscore", highscore);
+    }
+
+    add([
+      text("High Score: " + highscore),
+      pos(Width/2, Height/2+50),
+      origin("center")
+    ])
+  })
 
   add([
     text("Play Again"),
