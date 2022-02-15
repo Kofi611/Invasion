@@ -2747,30 +2747,36 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   }, "default");
 
   // code/main.js
-  Es();
+  Es({
+    background: [0, 0, 0]
+  });
   loadSprite("ship", "sprites/ship.png");
   loadSound("TheNovisBase", "sounds/TheNovisBase.wav");
   loadSound("AmbientPianoStrings", "sounds/AmbientPianoStrings.mp3");
   loadSound("BothOfUs", "sounds/BothOfUs.mp3");
+  layers([
+    "bg",
+    "obj",
+    "ui"
+  ], "obj");
   var score = 0;
   var scoreRecord = 0;
   var alienSpawnSpeed = 1;
   var alienSpeed = 50;
-  add([
-    rect(width(), height()),
-    color(0, 0, 0),
-    stay()
-  ]);
   scene("title", () => {
     add([
       text("Invasion"),
-      pos(width() / 2 - 100, 100)
+      layer("ui"),
+      pos(width() / 2, 100),
+      origin("center")
     ]);
     add([
       text("Play"),
-      pos(width() / 2 - 100, 200),
+      layer("ui"),
+      pos(width() / 2, 200),
       area(),
-      "play"
+      "play",
+      origin("center")
     ]);
     onClick("play", (play2) => go("game"));
   });
@@ -2816,12 +2822,6 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         "alien"
       ]);
     });
-    const scoreDisplay = add([
-      text("Score: 0", {
-        size: 48
-      }),
-      pos(width() - 250, 50)
-    ]);
     onUpdate(() => {
       if (score - scoreRecord >= 20) {
         scoreRecord = score;
@@ -2838,6 +2838,13 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         go("lose");
       }
     });
+    const scoreDisplay = add([
+      text("Score: 0", {
+        size: 48
+      }),
+      pos(width() - 250, 50),
+      layer("ui")
+    ]);
   });
   scene("lose", () => {
     add([
@@ -2847,7 +2854,8 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
     ]);
     add([
       text("Your Score: " + score),
-      pos(center().x, center().y + 10)
+      pos(width() / 2, height() / 2 + 50),
+      origin("center")
     ]);
     add([
       text("Play Again"),

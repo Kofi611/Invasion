@@ -1,7 +1,9 @@
 import kaboom from "kaboom"
 
 // initialize context
-kaboom()
+kaboom({
+  background: [0, 0, 0],
+});
 
 // load assets
 loadSprite("ship", "sprites/ship.png")
@@ -12,28 +14,34 @@ loadSound("AmbientPianoStrings", "sounds/AmbientPianoStrings.mp3")
 //music by madirfan from pixabay
 loadSound("BothOfUs", "sounds/BothOfUs.mp3")
 
+layers([
+  "bg",
+  "obj",
+  "ui",
+], "obj");
+
 var score = 0
 var scoreRecord = 0
 var alienSpawnSpeed = 1
 var alienSpeed = 50
 
-add([
-  rect(width(), height()),
-  color(0, 0, 0),
-  stay()
-])
+
 
 scene("title", () => {
   add([
     text("Invasion"),
-    pos((width()/2) - 100, 100)
+    layer("ui"),
+    pos((width()/2), 100),
+    origin("center")
   ])
 
   add([
     text("Play"),
-    pos((width()/2) - 100, 200),
+    layer("ui"),
+    pos((width()/2), 200),
     area(),
-    "play"
+    "play",
+    origin("center")
   ])
 
   onClick("play", (play) => go("game"))
@@ -87,13 +95,6 @@ scene("game", () => {
     ])
   })
 
-  const scoreDisplay = add([
-    text("Score: 0", {
-      size: 48
-    }),
-    pos(width() - 250, 50),
-  ])
-
   onUpdate(() => {
     if (score - scoreRecord >= 20) {
       scoreRecord = score;
@@ -113,6 +114,14 @@ scene("game", () => {
       go("lose")
     }
   })
+
+  const scoreDisplay = add([
+    text("Score: 0", {
+      size: 48
+    }),
+    pos(width() - 250, 50),
+    layer("ui"),
+  ])
 })
 
 scene("lose", () => {
@@ -123,7 +132,8 @@ scene("lose", () => {
   ])
   add([
     text("Your Score: " + score),
-    pos(center().x, center().y + 10)
+    pos(width()/2, height()/2 + 50),
+    origin("center")
   ])
 
   add([
