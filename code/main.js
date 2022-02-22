@@ -22,9 +22,11 @@ layers([
 
 var score = 0
 var scoreRecord = 0
+var secondScoreRecord = 0
 var alienSpawnSpeed = 1
 var alienSpeed = 50
 var health = 100
+var bulletSpeed = 200
 const Width = width()
 const Height = height()
 
@@ -41,14 +43,14 @@ scene("title", () => {
   add([
     text("Invasion"),
     layer("ui"),
-    pos((width() / 2), 100),
+    pos((Width / 2), 100),
     origin("center")
   ])
 
   add([
     text("Play"),
     layer("ui"),
-    pos((width() / 2), 200),
+    pos((Width / 2), 200),
     area(),
     "play",
     origin("center")
@@ -64,6 +66,7 @@ scene("game", () => {
 
   score = 0
   scoreRecord = 0
+  secondScoreRecord = 0
   alienSpawnSpeed = 1
   alienSpeed = 50
   health = 100
@@ -79,8 +82,8 @@ scene("game", () => {
   function spawnStars() {
     for (let i = 0; i < starCount; i++) {
       const newStar = {
-        xpos: rand(1, width()),
-        ypos: rand(1, height())
+        xpos: rand(1, Width),
+        ypos: rand(1, Height)
       };
       stars.push(newStar);
     }
@@ -121,7 +124,7 @@ scene("game", () => {
       pos(mousePos()),
       area(),
       origin("center"),
-      move(UP, 200),
+      move(UP, bulletSpeed),
       cleanup(3),
       "bullet",
       color(rgb(123, 104, 238))
@@ -146,14 +149,18 @@ scene("game", () => {
       scoreRecord = score;
       alienSpawnSpeed /= 1.25;
       alienSpeed *= 2
+      if (score >= 80 && score - secondScoreRecord >= 80) {
+        bulletSpeed *= 2
+      }
     }
   })
+
 
   const scoreDisplay = add([
     text("Score: 0", {
       size: 48
     }),
-    pos(width() - 250, 50),
+    pos(Width - 250, 50),
     layer("ui"),
   ])
 
@@ -196,7 +203,7 @@ scene("game", () => {
   })
 
   onUpdate("alien", (alien) => {
-    if (alien.pos.y >= height()) {
+    if (alien.pos.y >= Height) {
       gameMusic.pause()
       go("lose")
     }
@@ -211,7 +218,7 @@ scene("lose", () => {
   ])
   add([
     text("Your Score: " + score),
-    pos(width() / 2, height()/2),
+    pos(Width / 2, Height/2),
     origin("center")
   ])
 
@@ -230,14 +237,14 @@ scene("lose", () => {
 
   add([
     text("Play Again"),
-    pos(50, height() - 100),
+    pos(50, Height - 100),
     "restart",
     area()
   ])
 
   add([
     text("Main Menu"),
-    pos(width() - 450, height() - 100),
+    pos(Width - 450, Height - 100),
     "menu",
     area()
   ])

@@ -2762,9 +2762,11 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   ], "obj");
   var score = 0;
   var scoreRecord = 0;
+  var secondScoreRecord = 0;
   var alienSpawnSpeed = 1;
   var alienSpeed = 50;
   var health = 100;
+  var bulletSpeed = 200;
   var Width = width();
   var Height = height();
   replit.setData("highscore", score);
@@ -2796,6 +2798,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
   scene("game", () => {
     score = 0;
     scoreRecord = 0;
+    secondScoreRecord = 0;
     alienSpawnSpeed = 1;
     alienSpeed = 50;
     health = 100;
@@ -2845,7 +2848,7 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         pos(mousePos()),
         area(),
         origin("center"),
-        move(UP, 200),
+        move(UP, bulletSpeed),
         cleanup(3),
         "bullet",
         color(rgb(123, 104, 238))
@@ -2868,6 +2871,9 @@ vec4 frag(vec3 pos, vec2 uv, vec4 color, sampler2D tex) {
         scoreRecord = score;
         alienSpawnSpeed /= 1.25;
         alienSpeed *= 2;
+        if (score >= 80 && score - secondScoreRecord >= 80) {
+          bulletSpeed *= 2;
+        }
       }
     });
     const scoreDisplay = add([
